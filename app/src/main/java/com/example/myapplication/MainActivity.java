@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -12,15 +13,19 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
                 pickFile();
             }
         });
+
+
 
 
 
@@ -87,23 +94,38 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
+    public void onActivityResult(int requestCode, int resultCode, @Nullable final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CODE) {
 
-                Uri selectedImageUri = intent.getData();
+                final Uri selectedImageUri = intent.getData();
                 displayFromUri(selectedImageUri);
-                String filemanagerstring = selectedImageUri.getPath();
-                Log.e("jjkkjjk","kjkjkj"+filemanagerstring);
+                final String filemanagerstring = selectedImageUri.getPath();
+                final File file = new File(selectedImageUri.getPath());
+
+
+
 
             }
         }
     }
-    private void displayFromUri(Uri uri) {
+    private void displayFromUri(final Uri uri) {
         pdfFileName = getFileName(uri);
 
         pdfView.fromUri(uri).pages(0).defaultPage(0).enableSwipe(false).load();
+
+        pdfView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("kkjj","llll"+uri);
+                final String filemanagerstring = uri.getPath();
+
+                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+                intent.putExtra("imageUri", uri.toString());
+                startActivity(intent);
+            }
+        });
     }
 
     public String getFileName(Uri uri) {
